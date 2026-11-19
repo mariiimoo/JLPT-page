@@ -1,6 +1,6 @@
 {
-  "name": "日文單字打字練習",
-  "short_name": "日文打字",
+  "name": "日檢單字練習",
+  "short_name": "日檢單字練習",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#FDF4D2",
