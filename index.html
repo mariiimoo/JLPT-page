@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>日文單字打字練習</title>
+
+  <!-- PWA 與手機主畫面全螢幕設定 -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#FDF4D2" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="日文打字" />
+  <link rel="apple-touch-icon" href="./icon.png" />
+  <link rel="icon" type="image/png" href="./icon.png" />
+
+  <style>
+    /* =================================================================
+       1. 字體設定區
+    ================================================================= */
+    @font-face {
+      font-family: 'CustomJPFont';
+      src: url('./custom-font.ttf') format('truetype');
+      font-display: swap;
+    }
+
+    :root {
+      /* 網頁配色：https://colorhunt.co/palette/fdf4d2b0cde6a290b7946d6d */
+      --bg-cream: #FDF4D2;
+      --accent-blue: #B0CDE6;
+      --accent-purple: #A290B7;
+      --primary-brown: #946D6D;
+      --dark-brown: #5e4242;
+      --card-bg: #fffdf5;
+      --correct-green: #2e8b57;
+      --error-red: #d9534f;
+
+      /* 自訂字體垂直置中微調 */
+      --font-vertical-fix: -1px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'CustomJPFont', -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      background-color: var(--bg-cream);
+      color: var(--primary-brown);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: max(20px, env(safe-area-inset-top)) 16px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    header {
+      text-align: center;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed var(--accent-purple);
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      color: var(--dark-brown);
+      letter-spacing: 2px;
+      line-height: 1.2;
+    }
+
+    .controls-panel {
+      background-color: var(--card-bg);
+      border: 2px solid var(--accent-blue);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(148, 109, 109, 0.08);
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: var(--dark-brown);
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* 下拉選單上下置中與自訂箭頭 */
+    select {
+      font-family: inherit;
+      font-size: 0.95rem;
+      height: 38px;
+      padding: 4px 32px 8px 14px;
+      line-height: 22px;
+      border-radius: 10px;
+      border: 2px solid var(--accent-purple);
+      background-color: var(--bg-cream);
+      color: var(--dark-brown);
+      font-weight: bold;
+      cursor: pointer;
+      outline: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235e4242' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 15px;
+    }
+
+    .toggle-btn {
+      font-family: inherit;
+      font-size: 0.9rem;
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 20px;
+      border: 2px solid var(--accent-purple);
+      background-color: transparent;
+      color: var(--primary-brown);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .toggle-btn.book-btn {
+      border-color: var(--primary-brown);
+      background-color: var(--bg-cream);
+      color: var(--dark-brown);
+    }
+
+    .toggle-btn.book-btn:hover {
+      background-color: var(--accent-blue);
+      border-color: var(--accent-blue);
+    }
+
+    .toggle-btn span,
+    .btn-action span,
+    .level-badge span,
+    .review-badge span,
+    .modal-close-btn span,
+    .small-btn span {
+      transform: translateY(var(--font-vertical-fix));
+      display: inline-block;
+    }
+
+    .toggle-btn.active {
+      background-color: var(--accent-purple);
+      color: #ffffff;
+    }
+
+    .practice-card {
+      background-color: var(--card-bg);
+      border: 3px solid var(--primary-brown);
+      border-radius: 24px;
+      padding: 28px 24px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 8px 20px rgba(148, 109, 109, 0.12);
+      position: relative;
+    }
+
+    .badge-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .level-badge,
+    .review-badge {
+      height: 28px;
+      padding: 0 14px;
+      border-radius: 14px;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .level-badge {
+      background-color: var(--accent-blue);
+      color: var(--dark-brown);
+    }
+
+    .review-badge {
+      background-color: var(--accent-purple);
+      color: #fff;
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    .reading-hint {
+      font-size: 1.35rem;
+      color: var(--accent-purple);
+      min-height: 1.8rem;
+      letter-spacing: 3px;
+      font-weight: bold;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .reading-hint.visible {
+      visibility: visible;
+    }
+
+    .kanji-display {
+      font-size: 3rem;
+      font-weight: bold;
+      color: var(--dark-brown);
+      min-height: 4.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 4px;
+      line-height: 1.2;
+    }
+
+    .kanji-display.hidden-mode {
+      color: var(--accent-blue);
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+    }
+
+    .meaning-display {
+      font-size: 1.25rem;
+      color: var(--primary-brown);
+      background-color: var(--bg-cream);
+      min-height: 42px;
+      padding: 6px 22px;
+      border-radius: 12px;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.2;
+    }
+
+    .typing-feedback-box {
+      width: 100%;
+      min-height: 58px;
+      padding: 8px 16px;
+      border-bottom: 3px solid var(--accent-purple);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      letter-spacing: 3px;
+      font-weight: bold;
+      margin-top: 4px;
+      line-height: 1.2;
+    }
+
+    .char-correct {
+      color: var(--correct-green);
+    }
+
+    .char-wrong {
+      color: var(--error-red);
+      text-decoration: underline wavy var(--error-red);
+    }
+
+    .char-composing {
+      color: var(--accent-purple);
+      font-size: 1.45rem;
+      letter-spacing: 1px;
+      border-bottom: 2px dashed var(--accent-purple);
+      margin: 0 2px;
+    }
+
+    .char-pending {
+      color: #cbbba0;
+      opacity: 0.55;
+    }
+
+    .input-wrapper {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #typing-input {
+      font-family: inherit;
+      width: 100%;
+      height: 48px;
+      font-size: 1.15rem;
+      padding: 0 16px;
+      line-height: 44px;
+      border-radius: 14px;
+      border: 2px solid var(--accent-blue);
+      background-color: #ffffff;
+      color: var(--dark-brown);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    #typing-input:focus {
+      border-color: var(--primary-brown);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-action {
+      font-family: inherit;
+      font-size: 0.95rem;
+      height: 42px;
+      padding: 0 20px;
+      border-radius: 14px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .btn-action:active {
+      transform: scale(0.96);
+    }
+
+    .btn-action:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
+
+    .btn-hint {
+      background-color: var(--accent-blue);
+      color: var(--dark-brown);
+    }
+
+    .btn-skip {
+      background-color: var(--primary-brown);
+      color: #ffffff;
+    }
+
+    .status-footer {
+      font-size: 0.85rem;
+      color: var(--primary-brown);
+      text-align: center;
+      opacity: 0.85;
+    }
+
+    /* =================================================================
+       不熟單字本彈窗樣式
+    ================================================================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(94, 66, 66, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: var(--card-bg);
+      border: 3px solid var(--primary-brown);
+      border-radius: 22px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 30px rgba(94, 66, 66, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background-color: var(--bg-cream);
+      padding: 16px 20px;
+      border-bottom: 2px dashed var(--accent-purple);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 1.25rem;
+      color: var(--dark-brown);
+    }
+
+    .modal-close-btn {
+      font-family: inherit;
+      height: 32px;
+      padding: 0 14px;
+      border-radius: 16px;
+      border: 2px solid var(--primary-brown);
+      background-color: transparent;
+      color: var(--dark-brown);
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .modal-toolbar {
+      padding: 10px 20px;
+      background-color: #fffaf0;
+      border-bottom: 1px solid var(--accent-blue);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.88rem;
+    }
+
+    .small-btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      height: 30px;
+      padding: 0 12px;
+      border-radius: 10px;
+      border: none;
+      background-color: var(--accent-purple);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .small-btn.danger {
+      background-color: var(--error-red);
+    }
+
+    .modal-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .empty-book-msg {
+      text-align: center;
+      padding: 40px 16px;
+      color: var(--primary-brown);
+      font-size: 1.05rem;
+    }
+
+    .unfamiliar-item {
+      background-color: var(--bg-cream);
+      border: 2px solid var(--accent-blue);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .unfamiliar-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+
+    .unfamiliar-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .unfamiliar-lvl {
+      background-color: var(--accent-blue);
+      color: var(--dark-brown);
+      font-size: 0.78rem;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 8px;
+    }
+
+    .unfamiliar-kanji {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--dark-brown);
+    }
+
+    .unfamiliar-kana {
+      font-size: 1rem;
+      color: var(--accent-purple);
+      font-weight: bold;
+    }
+
+    .unfamiliar-meaning {
+      font-size: 0.95rem;
+      color: var(--primary-brown);
+    }
+
+    .unfamiliar-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .hint-count-tag {
+      font-size: 0.78rem;
+      color: var(--dark-brown);
+      background-color: rgba(162, 144, 183, 0.25);
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 540px) {
+      .kanji-display {
+        font-size: 2.3rem;
+        min-height: 3.4rem;
+      }
+      .meaning-display {
+        font-size: 1.1rem;
+      }
+      .typing-feedback-box {
+        font-size: 1.6rem;
+      }
+      .controls-panel {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .control-group {
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>日文單字打字練習</h1>
+    </header>
+
+    <!-- 控制面板 -->
+    <section class="controls-panel">
+      <div class="control-group">
+        <label for="level-select">出題級數：</label>
+        <select id="level-select">
+          <option value="ALL">全部級數隨機</option>
+          <option value="UNFAMILIAR">不熟單字本專練</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="input-mode-select">輸入模式：</label>
+        <select id="input-mode-select">
+          <option value="ROMAJI">羅馬拼音 (轉假名)</option>
+          <option value="KANA">日文輸入法 (假名)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <button id="toggle-kanji-btn" class="toggle-btn active" type="button"><span>顯示漢字：開</span></button>
+        <button id="open-book-btn" class="toggle-btn book-btn" type="button"><span>不熟單字本 (0)</span></button>
+      </div>
+    </section>
+
+    <!-- 主練習卡片 -->
+    <main class="practice-card">
+      <div class="badge-row">
+        <span id="word-level-badge" class="level-badge"><span>N5</span></span>
+        <span id="review-queue-badge" class="review-badge"><span>記憶曲線複習題</span></span>
+      </div>
+
+      <!-- 讀音提示 (預設關閉) -->
+      <div id="reading-hint" class="reading-hint"></div>
+
+      <!-- 漢字顯示 (預設開啟) -->
+      <div id="kanji-display" class="kanji-display">載入中...</div>
+
+      <!-- 中文意義 -->
+      <div id="meaning-display" class="meaning-display">請稍候</div>
+
+      <!-- 即時打字假名紅綠反饋區 -->
+      <div id="typing-feedback" class="typing-feedback-box"></div>
+
+      <!-- 輸入框 -->
+      <div class="input-wrapper">
+        <input
+          type="text"
+          id="typing-input"
+          placeholder="請在此輸入羅馬拼音..."
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+      </div>
+
+      <!-- 底部功能按鈕 -->
+      <div class="action-row">
+        <button id="hint-btn" class="btn-action btn-hint" type="button"><span>顯示讀音提示 (10題後複習)</span></button>
+        <button id="skip-btn" class="btn-action btn-skip" type="button"><span>跳過此題</span></button>
+      </div>
+    </main>
+
+    <div class="status-footer" id="status-footer">
+      已練習題數：0 ｜ 待複習記憶單字：0 ｜ 已收錄不熟單字：0
+    </div>
+  </div>
+
+  <!-- 不熟單字本瀏覽彈窗 -->
+  <div id="unfamiliar-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>不熟單字本（曾查看讀音提示）</h2>
+        <button id="close-book-btn" class="modal-close-btn" type="button"><span>關閉</span></button>
+      </div>
+      <div class="modal-toolbar">
+        <span id="book-count-label">共收錄 0 個單字</span>
+        <button id="clear-book-btn" class="small-btn danger" type="button"><span>清空全部</span></button>
+      </div>
+      <div id="unfamiliar-list" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    /* =================================================================
+       羅馬拼音即時轉平假名對照表
+    ================================================================= */
+    const ROMAJI_TO_KANA = {
+      'a':'あ', 'i':'い', 'u':'う', 'e':'え', 'o':'お',
+      'ka':'か', 'ki':'き', 'ku':'く', 'ke':'け', 'ko':'こ',
+      'sa':'さ', 'shi':'し', 'si':'し', 'su':'す', 'se':'せ', 'so':'そ',
+      'ta':'た', 'chi':'ち', 'ti':'ち', 'tsu':'つ', 'tu':'つ', 'te':'て', 'to':'と',
+      'na':'な', 'ni':'に', 'nu':'ぬ', 'ne':'ね', 'no':'の',
+      'ha':'は', 'hi':'ひ', 'fu':'ふ', 'hu':'ふ', 'he':'へ', 'ho':'ほ',
+      'ma':'ま', 'mi':'み', 'mu':'む', 'me':'め', 'mo':'も',
+      'ya':'や', 'yu':'ゆ', 'yo':'よ',
+      'ra':'ら', 'ri':'り', 'ru':'る', 're':'れ', 'ro':'ろ',
+      'wa':'わ', 'wo':'を', 'nn':'ん',
+      'ga':'が', 'gi':'ぎ', 'gu':'ぐ', 'ge':'げ', 'go':'ご',
+      'za':'ざ', 'ji':'じ', 'zi':'じ', 'zu':'ず', 'ze':'ぜ', 'zo':'ぞ',
+      'da':'だ', 'di':'ぢ', 'du':'づ', 'de':'で', 'do':'ど',
+      'ba':'ば', 'bi':'び', 'bu':'ぶ', 'be':'べ', 'bo':'ぼ',
+      'pa':'ぱ', 'pi':'ぴ', 'pu':'ぷ', 'pe':'ぺ', 'po':'ぽ',
+      'kya':'きゃ', 'kyu':'きゅ', 'kyo':'きょ',
+      'sha':'しゃ', 'sya':'しゃ', 'shu':'しゅ', 'syu':'しゅ', 'sho':'しょ', 'syo':'しょ',
+      'cha':'ちゃ', 'tya':'ちゃ', 'chu':'ちゅ', 'tyu':'ちゅ', 'cho':'ちょ', 'tyo':'ちょ',
+      'nya':'にゃ', 'nyu':'にゅ', 'nyo':'にょ',
+      'hya':'ひゃ', 'hyu':'ひゅ', 'hyo':'ひょ',
+      'mya':'みゃ', 'myu':'みゅ', 'myo':'みょ',
+      'rya':'りゃ', 'ryu':'りゅ', 'ryo':'りょ',
+      'gya':'ぎゃ', 'gyu':'ぎゅ', 'gyo':'ぎょ',
+      'ja':'じゃ', 'zya':'じゃ', 'jya':'じゃ',
+      'ju':'じゅ', 'zyu':'じゅ', 'jyu':'じゅ',
+      'jo':'じょ', 'zyo':'じょ', 'jyo':'じょ',
+      'bya':'びゃ', 'byu':'びゅ', 'byo':'びょ',
+      'pya':'ぴゃ', 'pyu':'ぴゅ', 'pyo':'ぴょ',
+      'xa':'ぁ', 'xi':'ぃ', 'xu':'ぅ', 'xe':'ぇ', 'xo':'ぉ',
+      'la':'ぁ', 'li':'ぃ', 'lu':'ぅ', 'le':'ぇ', 'lo':'ぉ',
+      'xya':'ゃ', 'xyu':'ゅ', 'xyo':'ょ',
+      'lya':'ゃ', 'lyu':'ゅ', 'lyo':'ょ',
+      'xtu':'っ', 'xtsu':'っ', 'ltu':'っ', 'ltsu':'っ',
+      '-':'ー'
+    };
+
+    const ROMAJI_KEYS = Object.keys(ROMAJI_TO_KANA);
+
+    function toHiragana(str) {
+      if (!str) return '';
+      return String(str).replace(/[\u30a1-\u30f6]/g, function(match) {
+        const chr = match.charCodeAt(0) - 0x60;
+        return String.fromCharCode(chr);
+      });
+    }
+
+    function parseRomajiToKana(rawInput, targetKana) {
+      const str = rawInput.toLowerCase();
+      let kana = '';
+      let i = 0;
+
+      while (i < str.length) {
+        const remain = str.slice(i);
+
+        if (
+          remain.length >= 2 &&
+          remain[0] === remain[1] &&
+          /[bcdfghjklmpqrstvwxyz]/.test(remain[0])
+        ) {
+          kana += 'っ';
+          i += 1;
+          continue;
+        }
+
+        let matched = false;
+        for (let len = 4; len >= 1; len--) {
+          if (remain.length >= len) {
+            const sub = remain.slice(0, len);
+            if (ROMAJI_TO_KANA[sub]) {
+              kana += ROMAJI_TO_KANA[sub];
+              i += len;
+              matched = true;
+              break;
+            }
+          }
+        }
+        if (matched) continue;
+
+        if (remain[0] === 'n') {
+          if (remain.length >= 2) {
+            const second = remain[1];
+            if (!/[aiueoyn']/.test(second)) {
+              kana += 'ん';
+              i += 1;
+              continue;
+            }
+          } else {
+            if (
+              targetKana &&
+              kana.length === targetKana.length - 1 &&
+              targetKana[kana.length] === 'ん'
+            ) {
+              kana += 'ん';
+              i += 1;
+              continue;
+            }
+          }
+        }
+
+        const isPrefix =
+          ROMAJI_KEYS.some(k => k.startsWith(remain)) ||
+          (remain.length === 1 && /[bcdfghjklmpqrstvwxyz]/.test(remain[0]));
+
+        if (isPrefix) {
+          return { kana, pending: remain };
+        } else {
+          kana += remain[0];
+          i += 1;
+        }
+      }
+
+      return { kana, pending: '' };
+    }
+
+    /* =================================================================
+       主程式進入點（先非同步載入外部 vocab.json，再初始化畫面）
+    ================================================================= */
+    let VOCABULARY_JSON = {};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const response = await fetch('./vocab.json?v=' + Date.now());
+        if (!response.ok) {
+          throw new Error(`無法讀取 vocab.json (狀態碼: ${response.status})`);
+        }
+        VOCABULARY_JSON = await response.json();
+      } catch (err) {
+        console.error('載入單字庫失敗:', err);
+        document.getElementById('kanji-display').textContent = '單字庫載入失敗';
+        document.getElementById('meaning-display').textContent = err.message;
+        return;
+      }
+
+      const STORAGE_KEY = 'jp_typing_unfamiliar_words_v1';
+
+      let currentLevel = 'ALL';
+      let inputMode = 'ROMAJI';
+      let showKanji = true;
+      let showHint = false;
+
+      let currentWord = null;
+      let isReviewQuestion = false;
+      let answeredCount = 0;
+      let isComposing = false;
+
+      let spacedRepetitionQueue = [];
+      let unfamiliarWords = loadUnfamiliarWords();
+
+      const levelSelect = document.getElementById('level-select');
+      const inputModeSelect = document.getElementById('input-mode-select');
+      const toggleKanjiBtn = document.getElementById('toggle-kanji-btn');
+      const openBookBtn = document.getElementById('open-book-btn');
+      const wordLevelBadge = document.getElementById('word-level-badge');
+      const reviewQueueBadge = document.getElementById('review-queue-badge');
+      const readingHintEl = document.getElementById('reading-hint');
+      const kanjiDisplayEl = document.getElementById('kanji-display');
+      const meaningDisplayEl = document.getElementById('meaning-display');
+      const typingFeedbackEl = document.getElementById('typing-feedback');
+      const typingInputEl = document.getElementById('typing-input');
+      const hintBtn = document.getElementById('hint-btn');
+      const skipBtn = document.getElementById('skip-btn');
+      const statusFooterEl = document.getElementById('status-footer');
+
+      const unfamiliarModal = document.getElementById('unfamiliar-modal');
+      const closeBookBtn = document.getElementById('close-book-btn');
+      const clearBookBtn = document.getElementById('clear-book-btn');
+      const bookCountLabel = document.getElementById('book-count-label');
+      const unfamiliarListEl = document.getElementById('unfamiliar-list');
+
+      function loadUnfamiliarWords() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveUnfamiliarWords() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(unfamiliarWords));
+        } catch (e) {
+          console.warn('無法儲存至 localStorage', e);
+        }
+        updateFooterStats();
+      }
+
+      function recordUnfamiliarWord(word) {
+        if (!word) return;
+        const idx = unfamiliarWords.findIndex(
+          item => item.kanji === word.kanji && item.kana === word.kana
+        );
+        if (idx !== -1) {
+          const existing = unfamiliarWords.splice(idx, 1)[0];
+          existing.hintCount = (existing.hintCount || 1) + 1;
+          existing.updatedAt = Date.now();
+          unfamiliarWords.unshift(existing);
+        } else {
+          unfamiliarWords.unshift({
+            level: word.level || 'N5',
+            kanji: word.kanji,
+            kana: word.kana,
+            meaning: word.meaning,
+            hintCount: 1,
+            updatedAt: Date.now()
+          });
+        }
+        saveUnfamiliarWords();
+      }
+
+      function initLevelOptions() {
+        const levels = Object.keys(VOCABULARY_JSON);
+        levels.forEach(lvl => {
+          if (Array.isArray(VOCABULARY_JSON[lvl])) {
+            const option = document.createElement('option');
+            option.value = lvl;
+            option.textContent = `${lvl} 單字庫 (${VOCABULARY_JSON[lvl].length}字)`;
+            levelSelect.appendChild(option);
+          }
+        });
+      }
+
+      function getWordPool() {
+        if (currentLevel === 'UNFAMILIAR') {
+          return unfamiliarWords.map(w => ({ ...w }));
+        }
+        if (currentLevel === 'ALL') {
+          let allWords = [];
+          for (const [lvl, words] of Object.entries(VOCABULARY_JSON)) {
+            if (Array.isArray(words)) {
+              words.forEach(w => allWords.push({ ...w, level: lvl }));
+            }
+          }
+          return allWords;
+        } else {
+          return (VOCABULARY_JSON[currentLevel] || []).map(w => ({
+            ...w,
+            level: currentLevel
+          }));
+        }
+      }
+
+      function nextQuestion() {
+        showHint = false;
+        readingHintEl.classList.remove('visible');
+        hintBtn.innerHTML = '<span>顯示讀音提示 (10題後複習)</span>';
+        hintBtn.disabled = false;
+        typingInputEl.value = '';
+
+        const dueIndex = spacedRepetitionQueue.findIndex(item => answeredCount >= item.dueAt);
+        if (dueIndex !== -1 && currentLevel !== 'UNFAMILIAR') {
+          const dueItem = spacedRepetitionQueue.splice(dueIndex, 1)[0];
+          currentWord = dueItem.word;
+          isReviewQuestion = true;
+        } else {
+          const pool = getWordPool();
+          if (pool.length === 0) {
+            currentWord = null;
+            kanjiDisplayEl.textContent = currentLevel === 'UNFAMILIAR' ? '尚無不熟單字' : '無單字資料';
+            meaningDisplayEl.textContent = currentLevel === 'UNFAMILIAR'
+              ? '練習時點擊「顯示讀音提示」即可自動收錄'
+              : '請檢查 vocab.json 內容格式';
+            typingFeedbackEl.innerHTML = '';
+            updateFooterStats();
+            return;
+          }
+          let candidate = pool[Math.floor(Math.random() * pool.length)];
+          if (pool.length > 1 && currentWord && candidate.kana === currentWord.kana && candidate.kanji === currentWord.kanji) {
+            candidate = pool[(pool.indexOf(candidate) + 1) % pool.length];
+          }
+          currentWord = candidate;
+          isReviewQuestion = false;
+        }
+
+        renderQuestion();
+        updateFeedback('');
+        updateFooterStats();
+        typingInputEl.focus();
+      }
+
+      function renderQuestion() {
+        if (!currentWord) return;
+
+        wordLevelBadge.innerHTML = `<span>${escapeHtml(currentWord.level)}</span>`;
+        reviewQueueBadge.style.display = isReviewQuestion ? 'inline-flex' : 'none';
+        readingHintEl.textContent = currentWord.kana || '';
+        meaningDisplayEl.textContent = currentWord.meaning || '';
+
+        if (showKanji) {
+          kanjiDisplayEl.textContent = currentWord.kanji || currentWord.kana;
+          kanjiDisplayEl.classList.remove('hidden-mode');
+        } else {
+          kanjiDisplayEl.textContent = '（漢字已隱藏）';
+          kanjiDisplayEl.classList.add('hidden-mode');
+        }
+      }
+
+      function updateFeedback(userInput) {
+        if (!currentWord) return;
+
+        const targetKana = toHiragana(currentWord.kana);
+        let typedKana = '';
+        let pendingRomaji = '';
+
+        if (inputMode === 'ROMAJI') {
+          const parsed = parseRomajiToKana(userInput.trim(), targetKana);
+          typedKana = parsed.kana;
+          pendingRomaji = parsed.pending;
+        } else {
+          typedKana = toHiragana(userInput.trim());
+        }
+
+        let html = '';
+        let isErrorPresent = false;
+
+        for (let i = 0; i < typedKana.length; i++) {
+          const inputChar = typedKana[i];
+          const targetChar = targetKana[i] || '';
+          if (!isErrorPresent && inputChar === targetChar) {
+            html += `<span class="char-correct">${escapeHtml(inputChar)}</span>`;
+          } else {
+            isErrorPresent = true;
+            html += `<span class="char-wrong">${escapeHtml(inputChar)}</span>`;
+          }
+        }
+
+        if (pendingRomaji) {
+          html += `<span class="char-composing">${escapeHtml(pendingRomaji)}</span>`;
+        }
+
+        const consumedLen = typedKana.length + (pendingRomaji ? 1 : 0);
+        if (consumedLen < targetKana.length) {
+          const remaining = targetKana.slice(consumedLen);
+          const placeholderDisplay = showHint ? remaining : '・'.repeat(remaining.length);
+          html += `<span class="char-pending">${placeholderDisplay}</span>`;
+        }
+
+        typingFeedbackEl.innerHTML = html;
+
+        if (!isErrorPresent && !pendingRomaji && typedKana === targetKana) {
+          typingInputEl.disabled = true;
+          setTimeout(() => {
+            typingInputEl.disabled = false;
+            answeredCount++;
+            nextQuestion();
+          }, 260);
+        }
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function updateFooterStats() {
+        const count = unfamiliarWords.length;
+        openBookBtn.innerHTML = `<span>不熟單字本 (${count})</span>`;
+        statusFooterEl.textContent = `已練習題數：${answeredCount} ｜ 待複習記憶單字：${spacedRepetitionQueue.length} ｜ 已收錄不熟單字：${count}`;
+      }
+
+      function renderUnfamiliarModal() {
+        bookCountLabel.textContent = `共收錄 ${unfamiliarWords.length} 個單字`;
+        if (unfamiliarWords.length === 0) {
+          unfamiliarListEl.innerHTML = `<div class="empty-book-msg">目前還沒有收錄任何不熟單字喔！<br>練習時若忘記讀音，點擊「顯示讀音提示」就會自動記錄在這裡。</div>`;
+          return;
+        }
+
+        unfamiliarListEl.innerHTML = unfamiliarWords.map((item, index) => `
+          <div class="unfamiliar-item">
+            <div class="unfamiliar-info">
+              <div class="unfamiliar-top">
+                <span class="unfamiliar-lvl">${escapeHtml(item.level)}</span>
+                <span class="unfamiliar-kanji">${escapeHtml(item.kanji)}</span>
+                <span class="unfamiliar-kana">（${escapeHtml(item.kana)}）</span>
+              </div>
+              <div class="unfamiliar-meaning">${escapeHtml(item.meaning)}</div>
+            </div>
+            <div class="unfamiliar-meta">
+              <span class="hint-count-tag">提示 ${item.hintCount || 1} 次</span>
+              <button class="small-btn" type="button" data-remove-index="${index}"><span>已記熟移除</span></button>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      levelSelect.addEventListener('change', (e) => {
+        currentLevel = e.target.value;
+        nextQuestion();
+      });
+
+      inputModeSelect.addEventListener('change', (e) => {
+        inputMode = e.target.value;
+        typingInputEl.placeholder = inputMode === 'ROMAJI'
+          ? '請在此輸入羅馬拼音...'
+          : '請切換日文鍵盤輸入平假名...';
+        typingInputEl.value = '';
+        updateFeedback('');
+        typingInputEl.focus();
+      });
+
+      toggleKanjiBtn.addEventListener('click', () => {
+        showKanji = !showKanji;
+        toggleKanjiBtn.innerHTML = `<span>${showKanji ? '顯示漢字：開' : '顯示漢字：關'}</span>`;
+        toggleKanjiBtn.classList.toggle('active', showKanji);
+        renderQuestion();
+        typingInputEl.focus();
+      });
+
+      hintBtn.addEventListener('click', () => {
+        if (!showHint && currentWord) {
+          showHint = true;
+          readingHintEl.classList.add('visible');
+          hintBtn.innerHTML = '<span>已收錄不熟本 (10題後複習)</span>';
+          hintBtn.disabled = true;
+
+          recordUnfamiliarWord(currentWord);
+
+          const alreadyQueued = spacedRepetitionQueue.some(
+            item => item.word.kana === currentWord.kana && item.word.kanji === currentWord.kanji
+          );
+          if (!alreadyQueued) {
+            spacedRepetitionQueue.push({
+              word: { ...currentWord },
+              dueAt: answeredCount + 10
+            });
+            updateFooterStats();
+          }
+          updateFeedback(typingInputEl.value);
+        }
+        typingInputEl.focus();
+      });
+
+      skipBtn.addEventListener('click', () => {
+        nextQuestion();
+      });
+
+      openBookBtn.addEventListener('click', () => {
+        renderUnfamiliarModal();
+        unfamiliarModal.classList.add('open');
+      });
+
+      closeBookBtn.addEventListener('click', () => {
+        unfamiliarModal.classList.remove('open');
+        typingInputEl.focus();
+      });
+
+      unfamiliarModal.addEventListener('click', (e) => {
+        if (e.target === unfamiliarModal) {
+          unfamiliarModal.classList.remove('open');
+          typingInputEl.focus();
+        }
+      });
+
+      unfamiliarListEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-remove-index]');
+        if (btn) {
+          const idx = Number(btn.getAttribute('data-remove-index'));
+          unfamiliarWords.splice(idx, 1);
+          saveUnfamiliarWords();
+          renderUnfamiliarModal();
+          if (currentLevel === 'UNFAMILIAR' && unfamiliarWords.length === 0) {
+            nextQuestion();
+          }
+        }
+      });
+
+      clearBookBtn.addEventListener('click', () => {
+        if (unfamiliarWords.length === 0) return;
+        if (confirm('確定要清空所有已收錄的不熟單字嗎？')) {
+          unfamiliarWords = [];
+          saveUnfamiliarWords();
+          renderUnfamiliarModal();
+          if (currentLevel === 'UNFAMILIAR') {
+            nextQuestion();
+          }
+        }
+      });
+
+      typingInputEl.addEventListener('compositionstart', () => {
+        isComposing = true;
+      });
+
+      typingInputEl.addEventListener('compositionend', (e) => {
+        isComposing = false;
+        updateFeedback(e.target.value);
+      });
+
+      typingInputEl.addEventListener('input', (e) => {
+        if (inputMode === 'KANA' && isComposing) {
+          return;
+        }
+        updateFeedback(e.target.value);
+      });
+
+      initLevelOptions();
+      updateFooterStats();
+      nextQuestion();
+    });
+  </script>
+</body>
+</html>
