@@ -12,6 +12,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="日檢單字練習" />
   <link rel="apple-touch-icon" href="./icon.png" />
+  <link rel="apple-touch-startup-image" href="./icon.png" />
   <link rel="icon" type="image/png" href="./icon.png" />
 
   <style>
@@ -28,7 +29,7 @@
        2. 主題配色系統（預設 / 藍天 / 黑夜）
     ================================================================= */
     :root {
-      /* 主題一：預設（米黃）https://colorhunt.co/palette/fdf4d2b0cde6a290b7946d6d */
+      /* 主題一：預設（米黃） */
       --bg-main: #FDF4D2;
       --accent-soft: #B0CDE6;
       --accent-strong: #A290B7;
@@ -43,11 +44,18 @@
       --pending-dot: #cbbba0;
       --shadow-color: rgba(148, 109, 109, 0.12);
 
-      /* 自訂字體垂直置中微調 */
-      --font-vertical-fix: 0px;
+      /* 電腦端按鈕文字垂直置中微調 */
+      --font-vertical-fix: -1px;
     }
 
-    /* 主題二：藍天 https://colorhunt.co/palette/f6f1f1afd3e219a7ce146c94 */
+    /* 手機端渲染基線不同，將垂直偏移歸零以解決偏上問題 */
+    @media (max-width: 768px) {
+      :root {
+        --font-vertical-fix: 0px;
+      }
+    }
+
+    /* 主題二：藍天 */
     [data-theme="sky"] {
       --bg-main: #F6F1F1;
       --accent-soft: #AFD3E2;
@@ -64,7 +72,7 @@
       --shadow-color: rgba(20, 108, 148, 0.12);
     }
 
-    /* 主題三：黑夜 https://colorhunt.co/palette/222831393e46948979dfd0b8 */
+    /* 主題三：黑夜 */
     [data-theme="night"] {
       --bg-main: #222831;
       --accent-soft: #948979;
@@ -96,6 +104,7 @@
       flex-direction: column;
       align-items: center;
       padding: max(20px, env(safe-area-inset-top)) 16px 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
@@ -155,8 +164,8 @@
       font-family: inherit;
       font-size: 0.95rem;
       height: 38px;
-      padding: 4px 32px 8px 14px;
-      line-height: 22px;
+      padding: 0 32px 0 14px;
+      line-height: 34px;
       border-radius: 10px;
       border: 2px solid var(--accent-strong);
       background-color: var(--bg-main);
@@ -213,7 +222,9 @@
     .modal-close-btn span,
     .small-btn span {
       transform: translateY(var(--font-vertical-fix));
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      line-height: 1;
     }
 
     .toggle-btn.active {
@@ -435,7 +446,7 @@
     }
 
     /* =================================================================
-       不熟單字本彈窗樣式
+       3. 不熟單字本彈窗樣式
     ================================================================= */
     .modal-overlay {
       position: fixed;
@@ -636,7 +647,7 @@
 
   <div class="container">
     <header>
-      <h1>日檢單字練習</h1>
+      <h1>日文單字打字練習</h1>
     </header>
 
     <!-- 控制面板 -->
@@ -724,6 +735,28 @@
   </div>
 
   <script>
+    /* =================================================================
+       提前套用已記憶的主題配色
+    ================================================================= */
+    const THEME_STORAGE_KEY = 'jp_typing_theme_v1';
+    const THEMES = [
+      { id: 'default', label: '配色：預設', bgColor: '#FDF4D2' },
+      { id: 'sky', label: '配色：藍天', bgColor: '#F6F1F1' },
+      { id: 'night', label: '配色：黑夜', bgColor: '#222831' }
+    ];
+    let currentThemeIndex = 0;
+
+    try {
+      const savedThemeId = localStorage.getItem(THEME_STORAGE_KEY);
+      const foundIdx = THEMES.findIndex(t => t.id === savedThemeId);
+      if (foundIdx !== -1) {
+        currentThemeIndex = foundIdx;
+        if (THEMES[foundIdx].id !== 'default') {
+          document.documentElement.setAttribute('data-theme', THEMES[foundIdx].id);
+        }
+      }
+    } catch (e) {}
+
     /* =================================================================
        羅馬拼音即時轉平假名對照表
     ================================================================= */
@@ -848,17 +881,9 @@
     let VOCABULARY_JSON = {};
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // 主題配色初始化（優先套用上次儲存的配色，避免畫面閃爍）
-      const THEME_STORAGE_KEY = 'jp_typing_theme_v1';
-      const THEMES = [
-        { id: 'default', label: '配色：預設', bgColor: '#FDF4D2' },
-        { id: 'sky', label: '配色：藍天', bgColor: '#F6F1F1' },
-        { id: 'night', label: '配色：黑夜', bgColor: '#222831' }
-      ];
-      let currentThemeIndex = 0;
-
       const themeToggleBtn = document.getElementById('theme-toggle-btn');
       const metaThemeColor = document.getElementById('meta-theme-color');
+      const typingInputEl = document.getElementById('typing-input');
 
       function applyTheme(index) {
         currentThemeIndex = index % THEMES.length;
@@ -877,14 +902,6 @@
         } catch (e) {}
       }
 
-      // 讀取已儲存的主題
-      try {
-        const savedThemeId = localStorage.getItem(THEME_STORAGE_KEY);
-        const foundIdx = THEMES.findIndex(t => t.id === savedThemeId);
-        if (foundIdx !== -1) {
-          currentThemeIndex = foundIdx;
-        }
-      } catch (e) {}
       applyTheme(currentThemeIndex);
 
       themeToggleBtn.addEventListener('click', () => {
@@ -931,7 +948,6 @@
       const kanjiDisplayEl = document.getElementById('kanji-display');
       const meaningDisplayEl = document.getElementById('meaning-display');
       const typingFeedbackEl = document.getElementById('typing-feedback');
-      const typingInputEl = document.getElementById('typing-input');
       const hintBtn = document.getElementById('hint-btn');
       const skipBtn = document.getElementById('skip-btn');
       const statusFooterEl = document.getElementById('status-footer');
