@@ -1,0 +1,20 @@
+{
+  "name": "日文單字打字練習",
+  "short_name": "日文打字",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FDF4D2",
+  "theme_color": "#FDF4D2",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
