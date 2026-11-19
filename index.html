@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>日文單字練習</title>
+  <title>日檢單字練習</title>
 
   <!-- PWA 與手機主畫面全螢幕設定 -->
   <link rel="manifest" href="./manifest.json" />
-  <meta name="theme-color" content="#FDF4D2" />
+  <meta id="meta-theme-color" name="theme-color" content="#FDF4D2" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="日文打字" />
+  <meta name="apple-mobile-web-app-title" content="日檢單字練習" />
   <link rel="apple-touch-icon" href="./icon.png" />
   <link rel="icon" type="image/png" href="./icon.png" />
 
@@ -24,19 +24,61 @@
       font-display: swap;
     }
 
+    /* =================================================================
+       2. 主題配色系統（預設 / 藍天 / 黑夜）
+    ================================================================= */
     :root {
-      /* 網頁配色：https://colorhunt.co/palette/fdf4d2b0cde6a290b7946d6d */
-      --bg-cream: #FDF4D2;
-      --accent-blue: #B0CDE6;
-      --accent-purple: #A290B7;
-      --primary-brown: #946D6D;
-      --dark-brown: #5e4242;
+      /* 主題一：預設（米黃）https://colorhunt.co/palette/fdf4d2b0cde6a290b7946d6d */
+      --bg-main: #FDF4D2;
+      --accent-soft: #B0CDE6;
+      --accent-strong: #A290B7;
+      --primary-main: #946D6D;
+      --text-strong: #5e4242;
       --card-bg: #fffdf5;
+      --input-bg: #ffffff;
+      --btn-soft-text: #5e4242;
+      --btn-strong-text: #ffffff;
       --correct-green: #2e8b57;
       --error-red: #d9534f;
+      --pending-dot: #cbbba0;
+      --shadow-color: rgba(148, 109, 109, 0.12);
 
       /* 自訂字體垂直置中微調 */
       --font-vertical-fix: -1px;
+    }
+
+    /* 主題二：藍天 https://colorhunt.co/palette/f6f1f1afd3e219a7ce146c94 */
+    [data-theme="sky"] {
+      --bg-main: #F6F1F1;
+      --accent-soft: #AFD3E2;
+      --accent-strong: #19A7CE;
+      --primary-main: #146C94;
+      --text-strong: #0e4d6a;
+      --card-bg: #ffffff;
+      --input-bg: #F6F1F1;
+      --btn-soft-text: #0e4d6a;
+      --btn-strong-text: #ffffff;
+      --correct-green: #1e824c;
+      --error-red: #d9534f;
+      --pending-dot: #a8c6d4;
+      --shadow-color: rgba(20, 108, 148, 0.12);
+    }
+
+    /* 主題三：黑夜 https://colorhunt.co/palette/222831393e46948979dfd0b8 */
+    [data-theme="night"] {
+      --bg-main: #222831;
+      --accent-soft: #948979;
+      --accent-strong: #DFD0B8;
+      --primary-main: #DFD0B8;
+      --text-strong: #DFD0B8;
+      --card-bg: #393E46;
+      --input-bg: #222831;
+      --btn-soft-text: #222831;
+      --btn-strong-text: #222831;
+      --correct-green: #6bcb77;
+      --error-red: #ff6b6b;
+      --pending-dot: #6c737e;
+      --shadow-color: rgba(0, 0, 0, 0.35);
     }
 
     * {
@@ -47,14 +89,14 @@
 
     body {
       font-family: 'CustomJPFont', -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
-      background-color: var(--bg-cream);
-      color: var(--primary-brown);
+      background-color: var(--bg-main);
+      color: var(--primary-main);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: max(20px, env(safe-area-inset-top)) 16px 20px;
-      padding-top: max(20px, env(safe-area-inset-top));
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     .container {
@@ -68,19 +110,19 @@
     header {
       text-align: center;
       padding-bottom: 10px;
-      border-bottom: 2px dashed var(--accent-purple);
+      border-bottom: 2px dashed var(--accent-strong);
     }
 
     header h1 {
       font-size: 1.6rem;
-      color: var(--dark-brown);
+      color: var(--text-strong);
       letter-spacing: 2px;
       line-height: 1.2;
     }
 
     .controls-panel {
       background-color: var(--card-bg);
-      border: 2px solid var(--accent-blue);
+      border: 2px solid var(--accent-soft);
       border-radius: 16px;
       padding: 14px 18px;
       display: flex;
@@ -88,19 +130,21 @@
       gap: 12px;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(148, 109, 109, 0.08);
+      box-shadow: 0 4px 12px var(--shadow-color);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .control-group {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     label {
       font-size: 0.95rem;
       font-weight: bold;
-      color: var(--dark-brown);
+      color: var(--text-strong);
       line-height: 1;
       display: inline-flex;
       align-items: center;
@@ -114,16 +158,16 @@
       padding: 4px 32px 8px 14px;
       line-height: 22px;
       border-radius: 10px;
-      border: 2px solid var(--accent-purple);
-      background-color: var(--bg-cream);
-      color: var(--dark-brown);
+      border: 2px solid var(--accent-strong);
+      background-color: var(--bg-main);
+      color: var(--text-strong);
       font-weight: bold;
       cursor: pointer;
       outline: none;
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
-      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235e4242' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
       background-repeat: no-repeat;
       background-position: right 10px center;
       background-size: 15px;
@@ -135,9 +179,9 @@
       height: 38px;
       padding: 0 14px;
       border-radius: 20px;
-      border: 2px solid var(--accent-purple);
+      border: 2px solid var(--accent-strong);
       background-color: transparent;
-      color: var(--primary-brown);
+      color: var(--primary-main);
       font-weight: bold;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -148,15 +192,18 @@
       line-height: 1;
     }
 
-    .toggle-btn.book-btn {
-      border-color: var(--primary-brown);
-      background-color: var(--bg-cream);
-      color: var(--dark-brown);
+    .toggle-btn.book-btn,
+    .toggle-btn.theme-btn {
+      border-color: var(--primary-main);
+      background-color: var(--bg-main);
+      color: var(--text-strong);
     }
 
-    .toggle-btn.book-btn:hover {
-      background-color: var(--accent-blue);
-      border-color: var(--accent-blue);
+    .toggle-btn.book-btn:hover,
+    .toggle-btn.theme-btn:hover {
+      background-color: var(--accent-soft);
+      border-color: var(--accent-soft);
+      color: var(--btn-soft-text);
     }
 
     .toggle-btn span,
@@ -170,13 +217,13 @@
     }
 
     .toggle-btn.active {
-      background-color: var(--accent-purple);
-      color: #ffffff;
+      background-color: var(--accent-strong);
+      color: var(--btn-strong-text);
     }
 
     .practice-card {
       background-color: var(--card-bg);
-      border: 3px solid var(--primary-brown);
+      border: 3px solid var(--primary-main);
       border-radius: 24px;
       padding: 28px 24px;
       text-align: center;
@@ -184,8 +231,9 @@
       flex-direction: column;
       align-items: center;
       gap: 16px;
-      box-shadow: 0 8px 20px rgba(148, 109, 109, 0.12);
+      box-shadow: 0 8px 20px var(--shadow-color);
       position: relative;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     .badge-row {
@@ -209,20 +257,20 @@
     }
 
     .level-badge {
-      background-color: var(--accent-blue);
-      color: var(--dark-brown);
+      background-color: var(--accent-soft);
+      color: var(--btn-soft-text);
     }
 
     .review-badge {
-      background-color: var(--accent-purple);
-      color: #fff;
+      background-color: var(--accent-strong);
+      color: var(--btn-strong-text);
       font-size: 0.8rem;
       display: none;
     }
 
     .reading-hint {
       font-size: 1.35rem;
-      color: var(--accent-purple);
+      color: var(--accent-strong);
       min-height: 1.8rem;
       letter-spacing: 3px;
       font-weight: bold;
@@ -240,7 +288,7 @@
     .kanji-display {
       font-size: 3rem;
       font-weight: bold;
-      color: var(--dark-brown);
+      color: var(--text-strong);
       min-height: 4.2rem;
       display: flex;
       align-items: center;
@@ -250,15 +298,15 @@
     }
 
     .kanji-display.hidden-mode {
-      color: var(--accent-blue);
+      color: var(--accent-soft);
       font-size: 1.4rem;
       letter-spacing: 1px;
     }
 
     .meaning-display {
       font-size: 1.25rem;
-      color: var(--primary-brown);
-      background-color: var(--bg-cream);
+      color: var(--primary-main);
+      background-color: var(--bg-main);
       min-height: 42px;
       padding: 6px 22px;
       border-radius: 12px;
@@ -273,7 +321,7 @@
       width: 100%;
       min-height: 58px;
       padding: 8px 16px;
-      border-bottom: 3px solid var(--accent-purple);
+      border-bottom: 3px solid var(--accent-strong);
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
@@ -295,16 +343,16 @@
     }
 
     .char-composing {
-      color: var(--accent-purple);
+      color: var(--accent-strong);
       font-size: 1.45rem;
       letter-spacing: 1px;
-      border-bottom: 2px dashed var(--accent-purple);
+      border-bottom: 2px dashed var(--accent-strong);
       margin: 0 2px;
     }
 
     .char-pending {
-      color: #cbbba0;
-      opacity: 0.55;
+      color: var(--pending-dot);
+      opacity: 0.65;
     }
 
     .input-wrapper {
@@ -324,16 +372,16 @@
       padding: 0 16px;
       line-height: 44px;
       border-radius: 14px;
-      border: 2px solid var(--accent-blue);
-      background-color: #ffffff;
-      color: var(--dark-brown);
+      border: 2px solid var(--accent-soft);
+      background-color: var(--input-bg);
+      color: var(--text-strong);
       text-align: center;
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background-color 0.25s;
     }
 
     #typing-input:focus {
-      border-color: var(--primary-brown);
+      border-color: var(--primary-main);
     }
 
     .action-row {
@@ -370,20 +418,20 @@
     }
 
     .btn-hint {
-      background-color: var(--accent-blue);
-      color: var(--dark-brown);
+      background-color: var(--accent-soft);
+      color: var(--btn-soft-text);
     }
 
     .btn-skip {
-      background-color: var(--primary-brown);
-      color: #ffffff;
+      background-color: var(--primary-main);
+      color: var(--btn-strong-text);
     }
 
     .status-footer {
       font-size: 0.85rem;
-      color: var(--primary-brown);
+      color: var(--primary-main);
       text-align: center;
-      opacity: 0.85;
+      opacity: 0.9;
     }
 
     /* =================================================================
@@ -392,7 +440,7 @@
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background-color: rgba(94, 66, 66, 0.5);
+      background-color: rgba(0, 0, 0, 0.55);
       display: none;
       justify-content: center;
       align-items: center;
@@ -406,21 +454,21 @@
 
     .modal-box {
       background-color: var(--card-bg);
-      border: 3px solid var(--primary-brown);
+      border: 3px solid var(--primary-main);
       border-radius: 22px;
       width: 100%;
       max-width: 640px;
       max-height: 82vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 12px 30px rgba(94, 66, 66, 0.25);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
       overflow: hidden;
     }
 
     .modal-header {
-      background-color: var(--bg-cream);
+      background-color: var(--bg-main);
       padding: 16px 20px;
-      border-bottom: 2px dashed var(--accent-purple);
+      border-bottom: 2px dashed var(--accent-strong);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -428,7 +476,7 @@
 
     .modal-header h2 {
       font-size: 1.25rem;
-      color: var(--dark-brown);
+      color: var(--text-strong);
     }
 
     .modal-close-btn {
@@ -436,9 +484,9 @@
       height: 32px;
       padding: 0 14px;
       border-radius: 16px;
-      border: 2px solid var(--primary-brown);
+      border: 2px solid var(--primary-main);
       background-color: transparent;
-      color: var(--dark-brown);
+      color: var(--text-strong);
       font-weight: bold;
       cursor: pointer;
       display: inline-flex;
@@ -449,8 +497,8 @@
 
     .modal-toolbar {
       padding: 10px 20px;
-      background-color: #fffaf0;
-      border-bottom: 1px solid var(--accent-blue);
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--accent-soft);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -464,8 +512,8 @@
       padding: 0 12px;
       border-radius: 10px;
       border: none;
-      background-color: var(--accent-purple);
-      color: #fff;
+      background-color: var(--accent-strong);
+      color: var(--btn-strong-text);
       font-weight: bold;
       cursor: pointer;
       display: inline-flex;
@@ -476,6 +524,7 @@
 
     .small-btn.danger {
       background-color: var(--error-red);
+      color: #ffffff;
     }
 
     .modal-body {
@@ -489,13 +538,13 @@
     .empty-book-msg {
       text-align: center;
       padding: 40px 16px;
-      color: var(--primary-brown);
+      color: var(--primary-main);
       font-size: 1.05rem;
     }
 
     .unfamiliar-item {
-      background-color: var(--bg-cream);
-      border: 2px solid var(--accent-blue);
+      background-color: var(--bg-main);
+      border: 2px solid var(--accent-soft);
       border-radius: 14px;
       padding: 12px 16px;
       display: flex;
@@ -519,8 +568,8 @@
     }
 
     .unfamiliar-lvl {
-      background-color: var(--accent-blue);
-      color: var(--dark-brown);
+      background-color: var(--accent-soft);
+      color: var(--btn-soft-text);
       font-size: 0.78rem;
       font-weight: bold;
       padding: 2px 8px;
@@ -530,18 +579,18 @@
     .unfamiliar-kanji {
       font-size: 1.3rem;
       font-weight: bold;
-      color: var(--dark-brown);
+      color: var(--text-strong);
     }
 
     .unfamiliar-kana {
       font-size: 1rem;
-      color: var(--accent-purple);
+      color: var(--accent-strong);
       font-weight: bold;
     }
 
     .unfamiliar-meaning {
       font-size: 0.95rem;
-      color: var(--primary-brown);
+      color: var(--primary-main);
     }
 
     .unfamiliar-meta {
@@ -554,8 +603,9 @@
 
     .hint-count-tag {
       font-size: 0.78rem;
-      color: var(--dark-brown);
-      background-color: rgba(162, 144, 183, 0.25);
+      color: var(--text-strong);
+      background-color: var(--card-bg);
+      border: 1px solid var(--accent-soft);
       padding: 2px 8px;
       border-radius: 8px;
       font-weight: bold;
@@ -586,7 +636,7 @@
 
   <div class="container">
     <header>
-      <h1>日文單字練習</h1>
+      <h1>日檢單字練習</h1>
     </header>
 
     <!-- 控制面板 -->
@@ -610,6 +660,7 @@
       <div class="control-group">
         <button id="toggle-kanji-btn" class="toggle-btn active" type="button"><span>顯示漢字：開</span></button>
         <button id="open-book-btn" class="toggle-btn book-btn" type="button"><span>不熟單字本 (0)</span></button>
+        <button id="theme-toggle-btn" class="toggle-btn theme-btn" type="button"><span>配色：預設</span></button>
       </div>
     </section>
 
@@ -653,7 +704,7 @@
     </main>
 
     <div class="status-footer" id="status-footer">
-      已練習題數：0 ｜ 待複習單字：0 ｜ 已收錄不熟單字：0
+      已練習題數：0 ｜ 待複習記憶單字：0 ｜ 已收錄不熟單字：0
     </div>
   </div>
 
@@ -792,11 +843,56 @@
     }
 
     /* =================================================================
-       主程式進入點（先非同步載入外部 vocab.json，再初始化畫面）
+       主程式進入點
     ================================================================= */
     let VOCABULARY_JSON = {};
 
     document.addEventListener('DOMContentLoaded', async () => {
+      // 主題配色初始化（優先套用上次儲存的配色，避免畫面閃爍）
+      const THEME_STORAGE_KEY = 'jp_typing_theme_v1';
+      const THEMES = [
+        { id: 'default', label: '配色：預設', bgColor: '#FDF4D2' },
+        { id: 'sky', label: '配色：藍天', bgColor: '#F6F1F1' },
+        { id: 'night', label: '配色：黑夜', bgColor: '#222831' }
+      ];
+      let currentThemeIndex = 0;
+
+      const themeToggleBtn = document.getElementById('theme-toggle-btn');
+      const metaThemeColor = document.getElementById('meta-theme-color');
+
+      function applyTheme(index) {
+        currentThemeIndex = index % THEMES.length;
+        const theme = THEMES[currentThemeIndex];
+        if (theme.id === 'default') {
+          document.documentElement.removeAttribute('data-theme');
+        } else {
+          document.documentElement.setAttribute('data-theme', theme.id);
+        }
+        themeToggleBtn.innerHTML = `<span>${theme.label}</span>`;
+        if (metaThemeColor) {
+          metaThemeColor.setAttribute('content', theme.bgColor);
+        }
+        try {
+          localStorage.setItem(THEME_STORAGE_KEY, theme.id);
+        } catch (e) {}
+      }
+
+      // 讀取已儲存的主題
+      try {
+        const savedThemeId = localStorage.getItem(THEME_STORAGE_KEY);
+        const foundIdx = THEMES.findIndex(t => t.id === savedThemeId);
+        if (foundIdx !== -1) {
+          currentThemeIndex = foundIdx;
+        }
+      } catch (e) {}
+      applyTheme(currentThemeIndex);
+
+      themeToggleBtn.addEventListener('click', () => {
+        applyTheme(currentThemeIndex + 1);
+        typingInputEl.focus();
+      });
+
+      // 非同步讀取外部單字庫
       try {
         const response = await fetch('./vocab.json?v=' + Date.now());
         if (!response.ok) {
